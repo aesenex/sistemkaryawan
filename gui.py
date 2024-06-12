@@ -271,10 +271,10 @@ class EmployeeManagementSystemApp:
         self.karyawan_search_button.pack(side="left")
 
         # Add treeview
-        self.karyawan_tree = ttk.Treeview(self.karyawan_frame, columns=("id_karyawan", "nama", "jenis_kelamin", "tanggal_lahir", "nomor_hape", "email", "alamat", "tanggal_join"), show="headings")
+        self.karyawan_tree = ttk.Treeview(self.karyawan_frame, columns=("id_karyawan", "nama", "jenis_kelamin", "tanggal_lahir", "nomor_hape", "email", "alamat", "tanggal_join","namaDepartemen"), show="headings")
         self.karyawan_tree.pack(fill="both", expand=True, padx=10, pady=10)
 
-        columns = ["ID Karyawan", "Nama", "Jenis Kelamin", "Tanggal Lahir", "Nomor Hape", "Email", "Alamat", "Tanggal Join"]
+        columns = ["ID Karyawan", "Nama", "Jenis Kelamin", "Tanggal Lahir", "Nomor Hape", "Email", "Alamat", "Tanggal Join", "Nama Departemen"]
         for col in self.karyawan_tree["columns"]:
             self.karyawan_tree.heading(col, text=columns[self.karyawan_tree["columns"].index(col)])
             self.karyawan_tree.column(col, width=100)
@@ -318,8 +318,9 @@ class EmployeeManagementSystemApp:
                 nomorHape LIKE %s OR \
                 emailKaryawan LIKE %s OR \
                 alamatKaryawan LIKE %s OR \
-                tanggalJoin LIKE %s"
-        params = (f'%{search_term}%', f'%{search_term}%',f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%')
+                tanggalJoin LIKE %s\
+                namaDepartemen LIKE %s OR "
+        params = (f'%{search_term}%',f'%{search_term}%', f'%{search_term}%',f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%')
         karyawan_records = self.fetch_data(query, params)
         self.karyawan_tree.delete(*self.karyawan_tree.get_children())
         for karyawan in karyawan_records:
@@ -334,9 +335,10 @@ class EmployeeManagementSystemApp:
         email = simpledialog.askstring("Input", "Masukkan Email:")
         alamat = simpledialog.askstring("Input", "Masukkan Alamat:")
         tanggal_join = simpledialog.askstring("Input", "Masukkan Tanggal Join (YYYY-MM-DD):")
+        namaDepartemen = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
 
-        query = "INSERT INTO karyawan (idKaryawan,namaKaryawan, jenisKelamin, tanggalLahir, nomorHape, emailKaryawan, alamatKaryawan, tanggalJoin) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        values = (id_karyawan,nama, jenis_kelamin, tanggal_lahir, nomor_hape, email, alamat, tanggal_join)
+        query = "INSERT INTO karyawan (idKaryawan,namaKaryawan, jenisKelamin, tanggalLahir, nomorHape, emailKaryawan, alamatKaryawan, tanggalJoin, namaDepartemen) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s)"
+        values = (id_karyawan,nama, jenis_kelamin, tanggal_lahir, nomor_hape, email, alamat, tanggal_join,namaDepartemen)
         if self.execute_query(query, values):
             self.load_karyawan_data()
 
@@ -355,9 +357,10 @@ class EmployeeManagementSystemApp:
         email = simpledialog.askstring("Input", "Masukkan Email:")
         alamat = simpledialog.askstring("Input", "Masukkan Alamat:")
         tanggal_join = simpledialog.askstring("Input", "Masukkan Tanggal Join (YYYY-MM-DD):")
+        namaDepartemen = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
 
-        query = "UPDATE karyawan SET idKaryawan=%s,namaKaryawan=%s, jenisKelamin=%s, tanggalLahir=%s, nomorHape=%s, emailKaryawan=%s, alamatKaryawan=%s, tanggalJoin=%s WHERE idKaryawan=%s"
-        values = (id_karyawan,nama, jenis_kelamin, tanggal_lahir, nomor_hape, email, alamat, tanggal_join, karyawan_id)
+        query = "UPDATE karyawan SET idKaryawan=%s,namaKaryawan=%s, jenisKelamin=%s, tanggalLahir=%s, nomorHape=%s, emailKaryawan=%s, alamatKaryawan=%s, tanggalJoin=%s, namaDepartemen=%s WHERE idKaryawan=%s"
+        values = (id_karyawan,nama, jenis_kelamin, tanggal_lahir, nomor_hape, email, alamat, tanggal_join, karyawan_id,namaDepartemen)
         if self.execute_query(query, values):
             self.load_karyawan_data()
 
