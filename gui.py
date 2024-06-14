@@ -2,6 +2,58 @@ import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 import mysql.connector
 import subprocess
+from PIL import Image, ImageTk
+import os
+
+# Kelas untuk entitas Karyawan
+class Karyawan:
+    def __init__(self, id_karyawan, nama, jenis_kelamin, tanggal_lahir, nomor_hape, email, alamat, tanggal_join, nama_departemen):
+        self.id_karyawan = id_karyawan
+        self.nama = nama
+        self.jenis_kelamin = jenis_kelamin
+        self.tanggal_lahir = tanggal_lahir
+        self.nomor_hape = nomor_hape
+        self.email = email
+        self.alamat = alamat
+        self.tanggal_join = tanggal_join
+        self.nama_departemen = nama_departemen
+
+# Kelas untuk entitas Departemen
+class Departemen:
+    def __init__(self, lot_departemen, nama, jenis, id_manager, nama_manager):
+        self.lot_departemen = lot_departemen
+        self.nama = nama
+        self.jenis = jenis
+        self.id_manager = id_manager
+        self.nama_manager = nama_manager
+
+# Kelas untuk entitas Proyek
+class Proyek:
+    def __init__(self, id_proyek, nama_proyek, lot_departemen, nama_departemen, tanggal_mulai, tanggal_selesai, status_proyek):
+        self.id_proyek = id_proyek
+        self.nama_proyek = nama_proyek
+        self.lot_departemen = lot_departemen
+        self.nama_departemen = nama_departemen
+        self.tanggal_mulai = tanggal_mulai
+        self.tanggal_selesai = tanggal_selesai
+        self.status_proyek = status_proyek
+
+# Kelas untuk entitas Absensi
+class Absensi:
+    def __init__(self, id_absensi, id_karyawan, tanggal_absensi, status_absensi, catatan_absensi):
+        self.id_absensi = id_absensi
+        self.id_karyawan = id_karyawan
+        self.tanggal_absensi = tanggal_absensi
+        self.status_absensi = status_absensi
+        self.catatan_absensi = catatan_absensi
+
+# Kelas untuk entitas Gaji
+class Gaji:
+    def __init__(self, id_gaji, id_karyawan, jumlah, tanggal):
+        self.id_gaji = id_gaji
+        self.id_karyawan = id_karyawan
+        self.jumlah = jumlah
+        self.tanggal = tanggal
 
 class EmployeeManagementSystemApp:
     def __init__(self, root):
@@ -10,11 +62,15 @@ class EmployeeManagementSystemApp:
 
         # Database connection parameters
         self.db_params = {
-            'host': 'localhost',
+            'host': '127.0.0.1',
             'user': 'root',
-            'password': '',
-            'database': 'sistemkaryawan'
+            'password':'',
+            'database':'sistemkaryawan'
         }
+
+        # Buat frame untuk gambar latar belakang
+        self.background_frame = ttk.Frame(root)
+        self.background_frame.pack(fill="both", expand=True)
 
         # Create tabs
         self.tab_control = ttk.Notebook(root)
@@ -22,14 +78,36 @@ class EmployeeManagementSystemApp:
         self.absensi_frame = ttk.Frame(self.tab_control)
         self.karyawan_frame = ttk.Frame(self.tab_control)
         self.proyek_frame = ttk.Frame(self.tab_control)
-        self.gaji_frame = ttk.Frame(self.tab_control)  # Add this line
+        self.gaji_frame = ttk.Frame(self.tab_control)
         self.tab_control.add(self.karyawan_frame, text='Karyawan')
         self.tab_control.add(self.departemen_frame, text='Departemen')
         self.tab_control.add(self.absensi_frame, text='Absensi')
         self.tab_control.add(self.proyek_frame, text='Proyek')
-        self.tab_control.add(self.gaji_frame, text='Gaji')  # Add this line
+        self.tab_control.add(self.gaji_frame, text='Gaji')
         self.tab_control.pack(expand=1, fill="both")
 
+        # Mengonversi gambar latar belakang ke format yang didukung tkinter
+        image_path = os.path.join("image", "depan.jpg")
+        self.background_image = Image.open(image_path)
+        self.background_image = self.background_image.resize((1919 , 687))
+        self.background_image = ImageTk.PhotoImage(self.background_image)
+
+        # Tambahkan Canvas untuk gambar latar belakang
+        self.canvas = tk.Canvas(root, width=1919 , height=687)
+        self.canvas.pack(fill="both", expand=True)
+
+        # Tambahkan gambar latar belakang ke canvas
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.background_image)
+
+        # Buat header_frame
+        header_frame = ttk.Frame(root)
+
+        #menempatkan header frame di atas bg frame
+        header_frame.pack()
+
+        # Lift header_frame ke atas lapisan agar tidak tertutupi oleh gambar latar belakang
+        header_frame.lift()
+        
         # Connect to MySQL database
         self.connection = mysql.connector.connect(**self.db_params)
 
@@ -37,18 +115,28 @@ class EmployeeManagementSystemApp:
         self.create_karyawan_widgets()
         self.create_departemen_widgets()
         self.create_gaji_widgets()
-        self.create_proyek_widgets() 
+        self.create_proyek_widgets()
         self.create_absensi_widgets()
+        
+
+        # Buat frame untuk tombol "Log Out"
+        self.logout_frame = ttk.Frame(root)
+        self.logout_frame.pack(side="left", fill="x", padx=10, pady=10)
 
         
-        #objek logout
-        self.logout_instance = Logout(self.root)
+        # Tambahkan tombol "Log Out" di logout_frame
+        self.logout_button = ttk.Button(self.logout_frame, text="Log Out", command=self.logout)
+        self.logout_button.pack(side="left", padx=10, pady=10)
+
+        
+        # Lift logout_frame ke atas lapisan agar tidak tertutupi oleh gambar latar belakang
+        self.logout_frame.lift()
 
     def logout(self):
-        # Menggunakan metode logout dari objek Logout
-        self.logout_instance.logout()
+        print("Logout Sukses")
+        self.root.destroy()
+        subprocess.Popen(["python", "login.py"])
 
-    # Rest of the EmployeeManagementSystemApp class with methods for creating widgets, fetching data, executing queries, etc.
     def fetch_data(self, query, params=()):
         cur = self.connection.cursor()
         cur.execute(query, params)
@@ -71,7 +159,7 @@ class EmployeeManagementSystemApp:
 
     # Create widgets for Departemen tab
     def create_departemen_widgets(self):
-    # Add search box
+        # Add search box
         self.departemen_search_label = ttk.Label(self.departemen_frame, text="Search:")
         self.departemen_search_label.pack(side="left", padx=(10, 5))
         self.departemen_search_entry = ttk.Entry(self.departemen_frame)
@@ -107,6 +195,9 @@ class EmployeeManagementSystemApp:
         self.departemen_refresh_button = ttk.Button(self.departemen_frame, text="Refresh", command=self.load_departemen_data)
         self.departemen_refresh_button.pack(side="left", padx=10, pady=10)
 
+        self.departemen_logout_button = ttk.Button(self.departemen_frame, text="Log Out", command=self.logout)
+        self.departemen_logout_button.pack(side="left", padx=10, pady=10)
+
     def load_departemen_data(self):
         self.departemen_tree.delete(*self.departemen_tree.get_children())
         query = "SELECT * FROM departemen"
@@ -141,14 +232,14 @@ class EmployeeManagementSystemApp:
             messagebox.showerror("Error", "No item selected")
             return
 
-        departemen_id = self.departemen_tree.item(selected_item)['values'][0]
+        lotDepartemen = self.departemen_tree.item(selected_item)['values'][0]
         nama = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
         jenis = simpledialog.askstring("Input", "Masukkan Jenis Departemen:")
         id_manager = simpledialog.askstring("Input", "Masukkan ID Manager:")
         nama_manager = simpledialog.askstring("Input", "Masukkan Nama Manager:")
 
         query = "UPDATE departemen SET namaDepartemen=%s, jenisDepartemen=%s, idManager=%s, namaManager=%s WHERE lotDepartemen=%s"
-        values = (nama, jenis, id_manager, nama_manager, departemen_id)
+        values = (lotDepartemen,nama, jenis, id_manager, nama_manager)
         if self.execute_query(query, values):
             self.load_departemen_data()
 
@@ -163,10 +254,9 @@ class EmployeeManagementSystemApp:
         if self.execute_query(query, (departemen_id,)):
             self.load_departemen_data()
 
-
-    # Create widgets for gaji tab
+    # Create widgets for Gaji tab
     def create_gaji_widgets(self):
-    # Add search box
+        # Add search box
         self.gaji_search_label = ttk.Label(self.gaji_frame, text="Search:")
         self.gaji_search_label.pack(side="left", padx=(10, 5))
         self.gaji_search_entry = ttk.Entry(self.gaji_frame)
@@ -186,6 +276,7 @@ class EmployeeManagementSystemApp:
         self.gaji_scrollbar = ttk.Scrollbar(self.gaji_frame, orient="vertical", command=self.gaji_tree.yview)
         self.gaji_scrollbar.pack(side="right", fill="y")
         self.gaji_tree.configure(yscrollcommand=self.gaji_scrollbar.set)
+       
 
         self.load_gaji_data()
 
@@ -202,6 +293,9 @@ class EmployeeManagementSystemApp:
         self.gaji_refresh_button = ttk.Button(self.gaji_frame, text="Refresh", command=self.load_gaji_data)
         self.gaji_refresh_button.pack(side="left", padx=10, pady=10)
 
+        self.gaji_logout_button = ttk.Button(self.gaji_frame, text="Log Out", command=self.logout)
+        self.gaji_logout_button.pack(side="left", padx=10, pady=10)
+
     def load_gaji_data(self):
         self.gaji_tree.delete(*self.gaji_tree.get_children())
         query = "SELECT * FROM gaji"
@@ -211,20 +305,17 @@ class EmployeeManagementSystemApp:
 
     def search_gaji(self):
         search_term = self.gaji_search_entry.get()
-        query = "SELECT * FROM gaji WHERE \
-                idGaji LIKE %s OR \
-                idKaryawan LIKE %s OR \
-                jumlah LIKE %s OR \
-                tanggal LIKE %s"
+        query = "SELECT * FROM gaji WHERE idGaji LIKE %s OR idKaryawan LIKE %s OR jumlah LIKE %s OR tanggal LIKE %s"
         params = (f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%')
         gaji_records = self.fetch_data(query, params)
+
         self.gaji_tree.delete(*self.gaji_tree.get_children())
         for gaji in gaji_records:
             self.gaji_tree.insert("", "end", values=gaji)
 
     def add_gaji(self):
-        id_karyawan = simpledialog.askinteger("Input", "Masukkan ID Karyawan:")
-        jumlah = simpledialog.askfloat("Input", "Masukkan Jumlah Gaji:")
+        id_karyawan = simpledialog.askstring("Input", "Masukkan ID Karyawan:")
+        jumlah = simpledialog.askstring("Input", "Masukkan Jumlah Gaji:")
         tanggal = simpledialog.askstring("Input", "Masukkan Tanggal (YYYY-MM-DD):")
 
         query = "INSERT INTO gaji (idKaryawan, jumlah, tanggal) VALUES (%s, %s, %s)"
@@ -239,8 +330,8 @@ class EmployeeManagementSystemApp:
             return
 
         gaji_id = self.gaji_tree.item(selected_item)['values'][0]
-        id_karyawan = simpledialog.askinteger("Input", "Masukkan ID Karyawan:")
-        jumlah = simpledialog.askfloat("Input", "Masukkan Jumlah Gaji:")
+        id_karyawan = simpledialog.askstring("Input", "Masukkan ID Karyawan:")
+        jumlah = simpledialog.askstring("Input", "Masukkan Jumlah Gaji:")
         tanggal = simpledialog.askstring("Input", "Masukkan Tanggal (YYYY-MM-DD):")
 
         query = "UPDATE gaji SET idKaryawan=%s, jumlah=%s, tanggal=%s WHERE idGaji=%s"
@@ -259,10 +350,9 @@ class EmployeeManagementSystemApp:
         if self.execute_query(query, (gaji_id,)):
             self.load_gaji_data()
 
-
     # Create widgets for Karyawan tab
     def create_karyawan_widgets(self):
-    # Add search box
+        # Add search box
         self.karyawan_search_label = ttk.Label(self.karyawan_frame, text="Search:")
         self.karyawan_search_label.pack(side="left", padx=(10, 5))
         self.karyawan_search_entry = ttk.Entry(self.karyawan_frame)
@@ -271,10 +361,10 @@ class EmployeeManagementSystemApp:
         self.karyawan_search_button.pack(side="left")
 
         # Add treeview
-        self.karyawan_tree = ttk.Treeview(self.karyawan_frame, columns=("id_karyawan", "nama", "jenis_kelamin", "tanggal_lahir", "nomor_hape", "email", "alamat", "tanggal_join","namaDepartemen"), show="headings")
+        self.karyawan_tree = ttk.Treeview(self.karyawan_frame, columns=("id_karyawan", "nama", "jenis_kelamin", "tanggal_lahir", "nomor_hape", "email", "alamat", "tanggal_join", "nama_departemen"), show="headings")
         self.karyawan_tree.pack(fill="both", expand=True, padx=10, pady=10)
 
-        columns = ["ID Karyawan", "Nama", "Jenis Kelamin", "Tanggal Lahir", "Nomor Hape", "Email", "Alamat", "Tanggal Join", "Nama Departemen"]
+        columns = ["ID Karyawan", "Nama", "Jenis Kelamin", "Tanggal Lahir", "Nomor HP", "Email", "Alamat", "Tanggal Join", "Nama Departemen"]
         for col in self.karyawan_tree["columns"]:
             self.karyawan_tree.heading(col, text=columns[self.karyawan_tree["columns"].index(col)])
             self.karyawan_tree.column(col, width=100)
@@ -298,47 +388,39 @@ class EmployeeManagementSystemApp:
         self.karyawan_refresh_button = ttk.Button(self.karyawan_frame, text="Refresh", command=self.load_karyawan_data)
         self.karyawan_refresh_button.pack(side="left", padx=10, pady=10)
 
+        self.karyawan_logout_button = ttk.Button(self.karyawan_frame, text="Log Out", command=self.logout)
+        self.karyawan_logout_button.pack(side="left", padx=10, pady=10)
+
     def load_karyawan_data(self):
-        try:
-            self.karyawan_tree.delete(*self.karyawan_tree.get_children())
-            query = "SELECT * FROM karyawan"
-            karyawan_records = self.fetch_data(query)
-            for karyawan in karyawan_records:
-                self.karyawan_tree.insert("", "end", values=karyawan)
-        except tk.TclError as e:
-            messagebox.showerror("Error", f"An error occurred: {e}")
+        self.karyawan_tree.delete(*self.karyawan_tree.get_children())
+        query = "SELECT * FROM karyawan"
+        karyawan_records = self.fetch_data(query)
+        for karyawan in karyawan_records:
+            self.karyawan_tree.insert("", "end", values=karyawan)
 
     def search_karyawan(self):
         search_term = self.karyawan_search_entry.get()
-        query = "SELECT * FROM karyawan WHERE \
-                idKaryawan LIKE %s OR \
-                namaKaryawan LIKE %s OR \
-                jenisKelamin LIKE %s OR \
-                tanggalLahir LIKE %s OR \
-                nomorHape LIKE %s OR \
-                emailKaryawan LIKE %s OR \
-                alamatKaryawan LIKE %s OR \
-                tanggalJoin LIKE %s\
-                namaDepartemen LIKE %s OR "
-        params = (f'%{search_term}%',f'%{search_term}%', f'%{search_term}%',f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%')
+        query = "SELECT * FROM karyawan WHERE idKaryawan LIKE %s OR nama LIKE %s OR jenisKelamin LIKE %s OR tanggalLahir LIKE %s OR nomorHape LIKE %s OR email LIKE %s OR alamat LIKE %s OR tanggalJoin LIKE %s OR namaDepartemen LIKE %s"
+        params = (f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%')
         karyawan_records = self.fetch_data(query, params)
+
         self.karyawan_tree.delete(*self.karyawan_tree.get_children())
         for karyawan in karyawan_records:
             self.karyawan_tree.insert("", "end", values=karyawan)
 
     def add_karyawan(self):
-        id_karyawan = simpledialog.askstring("Input", "Masukkan ID Karyawan")
-        nama = simpledialog.askstring("Input", "Masukkan Nama Karyawan:")
-        jenis_kelamin = simpledialog.askstring("Input", "Masukkan Jenis Kelamin (L/P):")
+        id_karyawan = simpledialog.askinteger("Input", "Masukkan ID Karyawan:")
+        nama_karyawan = simpledialog.askstring("Input", "Masukkan Nama Karyawan:")
+        jeniskelamin = simpledialog.asktstring("input", "Masukan Jenis Kelamin (L/P) :")
         tanggal_lahir = simpledialog.askstring("Input", "Masukkan Tanggal Lahir (YYYY-MM-DD):")
-        nomor_hape = simpledialog.askstring("Input", "Masukkan Nomor Hape:")
-        email = simpledialog.askstring("Input", "Masukkan Email:")
-        alamat = simpledialog.askstring("Input", "Masukkan Alamat:")
+        nomor_hape = simpledialog.askstring("Input", "Masukkan Nomor HP:")
+        email_karyawan = simpledialog.askstring("Input", "Masukkan Email:")
+        alamat_karyawan = simpledialog.askstring("Input", "Masukkan Alamat:")
         tanggal_join = simpledialog.askstring("Input", "Masukkan Tanggal Join (YYYY-MM-DD):")
-        namaDepartemen = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
+        nama_departemen = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
 
-        query = "INSERT INTO karyawan (idKaryawan,namaKaryawan, jenisKelamin, tanggalLahir, nomorHape, emailKaryawan, alamatKaryawan, tanggalJoin, namaDepartemen) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s)"
-        values = (id_karyawan,nama, jenis_kelamin, tanggal_lahir, nomor_hape, email, alamat, tanggal_join,namaDepartemen)
+        query = "INSERT INTO karyawan (IdKaryawan, namaKaryawan, jenisKelamin,tanggalLahir, nomorHape, emailKaryawan, alamatKaryawan, tanggalJoin, namaDepartemen) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        values = (id_karyawan, nama_karyawan, tanggal_lahir,jeniskelamin, nomor_hape, email_karyawan, alamat_karyawan, tanggal_join, nama_departemen)
         if self.execute_query(query, values):
             self.load_karyawan_data()
 
@@ -349,18 +431,18 @@ class EmployeeManagementSystemApp:
             return
 
         karyawan_id = self.karyawan_tree.item(selected_item)['values'][0]
-        id_karyawan = simpledialog.askstring("Input", "Masukkan ID Karyawan:")
-        nama = simpledialog.askstring("Input", "Masukkan Nama Karyawan:")
-        jenis_kelamin = simpledialog.askstring("Input", "Masukkan Jenis Kelamin (L/P):")
+        id_karyawan = simpledialog.askinteger("Input", "Masukkan ID Karyawan:")
+        nama_karyawan = simpledialog.askstring("Input", "Masukkan Nama Karyawan:")
+        jeniskelamin = simpledialog.asktstring("input", "Masukan Jenis Kelamin (L/P) :")
         tanggal_lahir = simpledialog.askstring("Input", "Masukkan Tanggal Lahir (YYYY-MM-DD):")
-        nomor_hape = simpledialog.askstring("Input", "Masukkan Nomor Hape:")
-        email = simpledialog.askstring("Input", "Masukkan Email:")
-        alamat = simpledialog.askstring("Input", "Masukkan Alamat:")
+        nomor_hape = simpledialog.askstring("Input", "Masukkan Nomor HP:")
+        email_karyawan = simpledialog.askstring("Input", "Masukkan Email:")
+        alamat_karyawan = simpledialog.askstring("Input", "Masukkan Alamat:")
         tanggal_join = simpledialog.askstring("Input", "Masukkan Tanggal Join (YYYY-MM-DD):")
-        namaDepartemen = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
+        nama_departemen = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
 
-        query = "UPDATE karyawan SET idKaryawan=%s,namaKaryawan=%s, jenisKelamin=%s, tanggalLahir=%s, nomorHape=%s, emailKaryawan=%s, alamatKaryawan=%s, tanggalJoin=%s, namaDepartemen=%s WHERE idKaryawan=%s"
-        values = (id_karyawan,nama, jenis_kelamin, tanggal_lahir, nomor_hape, email, alamat, tanggal_join, karyawan_id,namaDepartemen)
+        query = "UPDATE karyawan SET IdKaryawan=%s, namaKaryawan=%s,jenisKelamin=%s tanggalLahir=%s, nomorHape=%s, emailKaryawan=%s, alamatKaryawan=%s, tanggalJoin=%s, namaDepartemen=%s WHERE IdKaryawan=%s"
+        values = (id_karyawan, nama_karyawan,jeniskelamin, tanggal_lahir, nomor_hape, email_karyawan, alamat_karyawan, tanggal_join, nama_departemen, karyawan_id)
         if self.execute_query(query, values):
             self.load_karyawan_data()
 
@@ -371,26 +453,14 @@ class EmployeeManagementSystemApp:
             return
 
         karyawan_id = self.karyawan_tree.item(selected_item)['values'][0]
-
-        # Periksa apakah item tersebut masih ada
-        if not self.karyawan_tree.exists(selected_item):
-            messagebox.showerror("Error", "Item not found")
-            return
-
-        # Hapus data terkait di tabel absensi terlebih dahulu
-        query_absensi = "DELETE FROM absensi WHERE idKaryawan=%s"
-        self.execute_query(query_absensi, (karyawan_id,))
-        
-        # Hapus data dari tabel karyawan
-        query_karyawan = "DELETE FROM karyawan WHERE idKaryawan=%s"
-        if self.execute_query(query_karyawan, (karyawan_id,)):
+        query = "DELETE FROM karyawan WHERE IdKaryawan=%s"
+        if self.execute_query(query, (karyawan_id,)):
             self.load_karyawan_data()
 
 
-    
     # Create widgets for Proyek tab
     def create_proyek_widgets(self):
-    # Add search box
+        # Add search box
         self.proyek_search_label = ttk.Label(self.proyek_frame, text="Search:")
         self.proyek_search_label.pack(side="left", padx=(10, 5))
         self.proyek_search_entry = ttk.Entry(self.proyek_frame)
@@ -399,12 +469,12 @@ class EmployeeManagementSystemApp:
         self.proyek_search_button.pack(side="left")
 
         # Add treeview
-        self.proyek_tree = ttk.Treeview(self.proyek_frame, columns=("id_proyek", "nama_proyek","lot_departemen","nama_departemen", "tanggal_mulai", "tanggal_selesai", "status_proyek"), show="headings")
+        self.proyek_tree = ttk.Treeview(self.proyek_frame, columns=("id_proyek", "nama_proyek", "lot_departemen", "nama_departemen", "tanggal_mulai", "tanggal_selesai", "status_proyek"), show="headings")
         self.proyek_tree.pack(fill="both", expand=True, padx=10, pady=10)
 
-        columns = ["ID Proyek", "Nama Proyek", "Lot Departemen", "Nama Departemen","Tanggal Mulai", "Tanggal Selesai", "Status Proyek"]
+        columns = ["ID Proyek", "Nama Proyek", "Lot Departemen", "Nama Departemen", "Tanggal Mulai", "Tanggal Selesai", "Status Proyek"]
         for col in self.proyek_tree["columns"]:
-            self.proyek_tree.heading(col, text=columns[self.proyek_tree["columns"].index(col)] if self.proyek_tree["columns"].index(col) < len(columns) else "")
+            self.proyek_tree.heading(col, text=columns[self.proyek_tree["columns"].index(col)])
             self.proyek_tree.column(col, width=100)
 
         self.proyek_scrollbar = ttk.Scrollbar(self.proyek_frame, orient="vertical", command=self.proyek_tree.yview)
@@ -426,6 +496,9 @@ class EmployeeManagementSystemApp:
         self.proyek_refresh_button = ttk.Button(self.proyek_frame, text="Refresh", command=self.load_proyek_data)
         self.proyek_refresh_button.pack(side="left", padx=10, pady=10)
 
+        self.proyek_logout_button = ttk.Button(self.proyek_frame, text="Log Out", command=self.logout)
+        self.proyek_logout_button.pack(side="left", padx=10, pady=10)
+
     def load_proyek_data(self):
         self.proyek_tree.delete(*self.proyek_tree.get_children())
         query = "SELECT * FROM proyek"
@@ -435,27 +508,21 @@ class EmployeeManagementSystemApp:
 
     def search_proyek(self):
         search_term = self.proyek_search_entry.get()
-        query = "SELECT * FROM proyek WHERE \
-                idProyek LIKE %s OR \
-                namaProyek LIKE %s OR \
-                lotDepartemen LIKE %s OR \
-                namaDepartemen LIKE %s OR \
-                tanggalMulai LIKE %s OR \
-                tanggalSelesai LIKE %s OR \
-                statusProyek LIKE %s"
-        params = (f'%{search_term}%', f'%{search_term}%',f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%')
+        query = "SELECT * FROM proyek WHERE idProyek LIKE %s OR namaProyek LIKE %s OR lotDepartemen LIKE %s OR namaDepartemen LIKE %s OR tanggalMulai LIKE %s OR tanggalSelesai LIKE %s OR statusProyek LIKE %s"
+        params = (f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%')
         proyek_records = self.fetch_data(query, params)
+
         self.proyek_tree.delete(*self.proyek_tree.get_children())
         for proyek in proyek_records:
             self.proyek_tree.insert("", "end", values=proyek)
 
     def add_proyek(self):
         nama_proyek = simpledialog.askstring("Input", "Masukkan Nama Proyek:")
-        lot_departemen = simpledialog.askinteger("Input", "Masukkan Lot Departemen:")
+        lot_departemen = simpledialog.askstring("Input", "Masukkan Lot Departemen:")
         nama_departemen = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
         tanggal_mulai = simpledialog.askstring("Input", "Masukkan Tanggal Mulai (YYYY-MM-DD):")
         tanggal_selesai = simpledialog.askstring("Input", "Masukkan Tanggal Selesai (YYYY-MM-DD):")
-        status_proyek = simpledialog.askstring("Input", "Masukkan Status Proyek (Belum Selesai/Selesai/Tahap Pengerjaan):")
+        status_proyek = simpledialog.askstring("Input", "Masukkan Status Proyek:")
 
         query = "INSERT INTO proyek (namaProyek, lotDepartemen, namaDepartemen, tanggalMulai, tanggalSelesai, statusProyek) VALUES (%s, %s, %s, %s, %s, %s)"
         values = (nama_proyek, lot_departemen, nama_departemen, tanggal_mulai, tanggal_selesai, status_proyek)
@@ -470,11 +537,11 @@ class EmployeeManagementSystemApp:
 
         proyek_id = self.proyek_tree.item(selected_item)['values'][0]
         nama_proyek = simpledialog.askstring("Input", "Masukkan Nama Proyek:")
-        lot_departemen = simpledialog.askinteger("Input", "Masukkan Lot Departemen:")
+        lot_departemen = simpledialog.askstring("Input", "Masukkan Lot Departemen:")
         nama_departemen = simpledialog.askstring("Input", "Masukkan Nama Departemen:")
         tanggal_mulai = simpledialog.askstring("Input", "Masukkan Tanggal Mulai (YYYY-MM-DD):")
         tanggal_selesai = simpledialog.askstring("Input", "Masukkan Tanggal Selesai (YYYY-MM-DD):")
-        status_proyek = simpledialog.askstring("Input", "Masukkan Status Proyek (Belum Selesai/Selesai/Tahap Pengerjaan):")
+        status_proyek = simpledialog.askstring("Input", "Masukkan Status Proyek:")
 
         query = "UPDATE proyek SET namaProyek=%s, lotDepartemen=%s, namaDepartemen=%s, tanggalMulai=%s, tanggalSelesai=%s, statusProyek=%s WHERE idProyek=%s"
         values = (nama_proyek, lot_departemen, nama_departemen, tanggal_mulai, tanggal_selesai, status_proyek, proyek_id)
@@ -492,11 +559,9 @@ class EmployeeManagementSystemApp:
         if self.execute_query(query, (proyek_id,)):
             self.load_proyek_data()
 
-
-
-    # Create widgets for absensi tab
+    # Create widgets for Absensi tab
     def create_absensi_widgets(self):
-        # Tambahkan kotak pencarian
+        # Add search box
         self.absensi_search_label = ttk.Label(self.absensi_frame, text="Search:")
         self.absensi_search_label.pack(side="left", padx=(10, 5))
         self.absensi_search_entry = ttk.Entry(self.absensi_frame)
@@ -504,7 +569,7 @@ class EmployeeManagementSystemApp:
         self.absensi_search_button = ttk.Button(self.absensi_frame, text="Search", command=self.search_absensi)
         self.absensi_search_button.pack(side="left")
 
-        # Tambahkan treeview
+        # Add treeview
         self.absensi_tree = ttk.Treeview(self.absensi_frame, columns=("id_absensi", "id_karyawan", "tanggal_absensi", "status_absensi", "catatan_absensi"), show="headings")
         self.absensi_tree.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -519,7 +584,7 @@ class EmployeeManagementSystemApp:
 
         self.load_absensi_data()
 
-        # Tambahkan tombol
+        # Add buttons
         self.absensi_add_button = ttk.Button(self.absensi_frame, text="Add", command=self.add_absensi)
         self.absensi_add_button.pack(side="left", padx=10, pady=10)
 
@@ -532,6 +597,9 @@ class EmployeeManagementSystemApp:
         self.absensi_refresh_button = ttk.Button(self.absensi_frame, text="Refresh", command=self.load_absensi_data)
         self.absensi_refresh_button.pack(side="left", padx=10, pady=10)
 
+        self.absensi_logout_button = ttk.Button(self.absensi_frame, text="Log Out", command=self.logout)
+        self.absensi_logout_button.pack(side="left", padx=10, pady=10)
+
     def load_absensi_data(self):
         self.absensi_tree.delete(*self.absensi_tree.get_children())
         query = "SELECT * FROM absensi"
@@ -541,33 +609,16 @@ class EmployeeManagementSystemApp:
 
     def search_absensi(self):
         search_term = self.absensi_search_entry.get()
-        query = """
-        SELECT * FROM absensi WHERE 
-        idAbsensi LIKE %s OR 
-        idKaryawan LIKE %s OR 
-        tanggalAbsensi LIKE %s OR 
-        statusAbsensi LIKE %s OR 
-        catatanAbsensi LIKE %s
-        """
+        query = "SELECT * FROM absensi WHERE idAbsensi LIKE %s OR idKaryawan LIKE %s OR tanggalAbsensi LIKE %s OR statusAbsensi LIKE %s OR catatanAbsensi LIKE %s"
         params = (f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%', f'%{search_term}%')
         absensi_records = self.fetch_data(query, params)
-        
+
         self.absensi_tree.delete(*self.absensi_tree.get_children())
         for absensi in absensi_records:
             self.absensi_tree.insert("", "end", values=absensi)
 
-
-
     def add_absensi(self):
-        id_karyawan = simpledialog.askinteger("Input", "Masukkan ID Karyawan:")
-
-        # Periksa apakah id_karyawan ada di tabel karyawan
-        check_query = "SELECT COUNT(*) FROM karyawan WHERE idKaryawan = %s"
-        result = self.fetch_data(check_query, (id_karyawan,))
-        if result[0][0] == 0:
-            messagebox.showerror("Error", f"ID Karyawan {id_karyawan} tidak ada")
-            return
-
+        id_karyawan = simpledialog.askstring("Input", "Masukkan ID Karyawan:")
         tanggal_absensi = simpledialog.askstring("Input", "Masukkan Tanggal Absensi (YYYY-MM-DD):")
         status_absensi = simpledialog.askstring("Input", "Masukkan Status Absensi:")
         catatan_absensi = simpledialog.askstring("Input", "Masukkan Catatan Absensi:")
@@ -577,7 +628,6 @@ class EmployeeManagementSystemApp:
         if self.execute_query(query, values):
             self.load_absensi_data()
 
-
     def edit_absensi(self):
         selected_item = self.absensi_tree.selection()
         if not selected_item:
@@ -585,12 +635,12 @@ class EmployeeManagementSystemApp:
             return
 
         absensi_id = self.absensi_tree.item(selected_item)['values'][0]
-        id_karyawan = simpledialog.askinteger("Input", "Masukkan ID Karyawan:")
+        id_karyawan = simpledialog.askstring("Input", "Masukkan ID Karyawan:")
         tanggal_absensi = simpledialog.askstring("Input", "Masukkan Tanggal Absensi (YYYY-MM-DD):")
         status_absensi = simpledialog.askstring("Input", "Masukkan Status Absensi:")
         catatan_absensi = simpledialog.askstring("Input", "Masukkan Catatan Absensi:")
 
-        query = "UPDATE absensi SET id_karyawan=%s, tanggal_absensi=%s, status_absensi=%s, catatan_absensi=%s WHERE id_absensi=%s"
+        query = "UPDATE absensi SET idKaryawan=%s, tanggalAbsensi=%s, statusAbsensi=%s, catatanAbsensi=%s WHERE idAbsensi=%s"
         values = (id_karyawan, tanggal_absensi, status_absensi, catatan_absensi, absensi_id)
         if self.execute_query(query, values):
             self.load_absensi_data()
@@ -605,30 +655,8 @@ class EmployeeManagementSystemApp:
         query = "DELETE FROM absensi WHERE idAbsensi=%s"
         if self.execute_query(query, (absensi_id,)):
             self.load_absensi_data()
-class Logout:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Employee Management System")
-        self.create_widgets()
 
-    def create_widgets(self):
-        # ... semua widget yang ada di sini ...
-
-        # Tambahkan tombol "Log out"
-        self.logout_button = tk.Button(self.root, text="Log Out", command=self.logout)
-        self.logout_button.pack()
-
-    def logout(self):
-        print("Logout Sukses")
-        self.root.destroy()
-        subprocess.Popen(["python", "login.py"])
-
-# Create the main window
 root = tk.Tk()
-
-
-    # Create the EmployeeManagementSystemApp application
 app = EmployeeManagementSystemApp(root)
-
-    # Run the application
 root.mainloop()
+

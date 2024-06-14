@@ -1,6 +1,7 @@
 import login
 import gui
 import databaseconfig
+import tkinter as tk
 
 def main():
     print("Aplikasi Employee Management System")
@@ -9,12 +10,19 @@ def main():
     db_config = databaseconfig.DatabaseConfig()
     db_config.configure_database()
 
-     # Eksekusi modul karyawan
-    gui.EmployeeManagementSystemApp()  # Ganti dengan nama fungsi atau kelas yang sesuai
+    # Buat jendela utama Tkinter
+    root = tk.Tk()
+
+    # Eksekusi modul karyawan
+    app = gui.EmployeeManagementSystemApp(root)
 
     # Eksekusi modul login
-    login.LoginApp()  # Ganti dengan nama fungsi atau kelas yang sesuai
+    login.LoginApp()
 
-   
+    # Jalankan aplikasi Tkinter
+    root.mainloop()
+
 if __name__ == "__main__":
     main()
+
+

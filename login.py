@@ -9,7 +9,7 @@ class LoginApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Login Employee Management System")
-        self.root.geometry("400x500")
+        self.root.geometry("1920x1080")
 
         # Setup the background for the main window (login)
         self.setup_main_background()
@@ -19,11 +19,9 @@ class LoginApp:
         header_frame.place(relx=0.5, rely=0.10, anchor=tk.N)
 
         # Header Label
-        header_label = ttk.Label(header_frame, text="Selamat Datang!", font=("Arial", 18, "bold"), foreground="black")
-        header_label.pack()
-
+        
         # Canvas untuk latar belakang
-        self.canvas = tk.Canvas(root, width=2560, height=1440)
+        self.canvas = tk.Canvas(root, width=1920, height=1080)
         self.canvas.place(x=0, y=0)
 
         # Mendapatkan path lengkap ke gambar belakang
@@ -32,7 +30,7 @@ class LoginApp:
 
         # Mengonversi gambar latar belakang ke format yang didukung tkinter
         self.background_image = Image.open(image_path)
-        self.background_image = self.background_image.resize((2560, 1440))
+        self.background_image = self.background_image.resize((1920, 1080))
         self.background_image = ImageTk.PhotoImage(self.background_image)
 
         # Menambahkan gambar belakang ke canvas
@@ -152,11 +150,11 @@ class LoginApp:
 
         # Convert the background image to a format supported by tkinter
         self.main_background_image = Image.open(image_path)
-        self.main_background_image = self.main_background_image.resize((800, 600))
+        self.main_background_image = self.main_background_image.resize((1920, 1080))
         self.main_background_photo = ImageTk.PhotoImage(self.main_background_image)
 
         # Create a Canvas widget for the main window background
-        self.main_canvas = tk.Canvas(self.root, width=800, height=600)
+        self.main_canvas = tk.Canvas(self.root, width=1920, height=1080)
         self.main_canvas.place(x=0, y=0)
 
         # Add the image to the main window canvas
@@ -165,8 +163,8 @@ class LoginApp:
     def show_register_window(self):
         self.hide_login_window()  # Sembunyikan jendela login saat membuka jendela pendaftaran
         self.register_window = tk.Toplevel(self.root)
-        self.register_window.title("Daftar Gratis")
-        self.register_window.geometry("400x500")
+        self.register_window.title("Register")
+        self.register_window.geometry("1920x1080")
 
         # Get the complete path to the background image
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -174,46 +172,55 @@ class LoginApp:
 
         # Convert the background image to a format supported by tkinter
         self.register_background_image = Image.open(image_path)
-        self.register_background_image = self.register_background_image.resize((400, 500))
+        self.register_background_image = self.register_background_image.resize((1920, 1080))
         self.register_background_photo = ImageTk.PhotoImage(self.register_background_image)
 
         # Create a Canvas widget for the register window background
-        self.register_canvas = tk.Canvas(self.register_window, width=400, height=500)
+        self.register_canvas = tk.Canvas(self.register_window, width=1920, height=1080)
         self.register_canvas.pack(fill="both", expand=True)
 
         # Add the image to the register window canvas
         self.register_canvas.create_image(0, 0, anchor="nw", image=self.register_background_photo)
 
+        #Header Frame
+        header_frame = ttk.Frame(self.register_window)
+        header_frame.place(relx=0.5, rely=0.10, anchor=tk.N)    
+
+        
+        # Form Frame
+        form_frame = ttk.Frame(self.register_window)
+        form_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
         # Create and place widgets on the register window canvas
-        name_label = ttk.Label(self.register_window, text="Nama Lengkap:")
-        self.register_canvas.create_window(200, 50, window=name_label)
-        self.name_entry = ttk.Entry(self.register_window)
-        self.register_canvas.create_window(200, 80, window=self.name_entry)
+        name_label = ttk.Label(form_frame, text="Nama Lengkap:")
+        name_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        self.name_entry = ttk.Entry(form_frame)
+        self.name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        email_label = ttk.Label(self.register_window, text="Email:")
-        self.register_canvas.create_window(200, 120, window=email_label)
-        self.email_entry = ttk.Entry(self.register_window)
-        self.register_canvas.create_window(200, 150, window=self.email_entry)
+        email_label = ttk.Label(form_frame, text="Email:")
+        email_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        self.email_entry = ttk.Entry(form_frame)
+        self.email_entry.grid(row=1, column=1, padx=10, pady=5)
 
-        username_label = ttk.Label(self.register_window, text="Username:")
-        self.register_canvas.create_window(200, 190, window=username_label)
-        self.username_entry = ttk.Entry(self.register_window)
-        self.register_canvas.create_window(200, 220, window=self.username_entry)
+        username_label = ttk.Label(form_frame, text="Username:")
+        username_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        self.username_entry = ttk.Entry(form_frame)
+        self.username_entry.grid(row=2, column=1, padx=10, pady=5)
 
-        password_label = ttk.Label(self.register_window, text="Password:")
-        self.register_canvas.create_window(200, 260, window=password_label)
-        self.password_entry = ttk.Entry(self.register_window, show='*')
-        self.register_canvas.create_window(200, 290, window=self.password_entry)
+        password_label = ttk.Label(form_frame, text="Password:")
+        password_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        self.password_entry = ttk.Entry(form_frame, show='*')
+        self.password_entry.grid(row=3, column=1, padx=10, pady=5)
 
-        show_password_checkbox = ttk.Checkbutton(self.register_window, text="Lihat Password", command=self.toggle_password)
-        self.register_canvas.create_window(200, 330, window=show_password_checkbox)
+        show_password_checkbox = ttk.Checkbutton(form_frame, text="Lihat Password", command=self.toggle_password)
+        show_password_checkbox.grid(row=4, column=1, padx=10, pady=5)
 
         register_button = ttk.Button(self.register_window, text="Daftar", command=self.on_register)
-        self.register_canvas.create_window(200, 370, window=register_button)
+        register_button.place(relx=0.5, rely=0.7, anchor=tk.CENTER)  # Menggunakan posisi yang sama dengan tombol login
 
         # Add Back Button
         back_button = ttk.Button(self.register_window, text="Kembali", command=self.on_back)
-        self.register_canvas.create_window(200, 410, window=back_button)
+        back_button.place(relx=0.5, rely=0.8, anchor=tk.CENTER)  # Menggunakan posisi yang sama dengan label register
 
     def on_back(self):
         self.register_window.destroy()  # Close the register window
@@ -304,6 +311,8 @@ class LoginApp:
             print("Error:", err)
             messagebox.showerror("Error", "Gagal mengubah password. Silakan coba lagi.")
 
+
 root = tk.Tk()
+
 app = LoginApp(root)
 root.mainloop()
