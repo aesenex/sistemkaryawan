@@ -1,4 +1,2 @@
-# sistemkaryawan
-# managementkaryawan
-# managementkaryawan
+
 # kelompoksatuforuas
